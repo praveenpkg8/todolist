@@ -1,13 +1,12 @@
 import functools
 import json
 
-from flask import Blueprint, request,jsonify
+from flask import Blueprint, request, jsonify
 
-from models.todo import  Notes
-from flask_api import status
+from models.todo import Notes
+from status_code import Staus_code
 
-
-bp = Blueprint('notes',__name__,url_prefix='/notes')
+bp = Blueprint('notes', __name__, url_prefix='/notes')
 
 
 @bp.route('/list', methods=['GET'])
@@ -26,7 +25,7 @@ def view():
     message = {
         "notes": data
     }
-    return json.dumps(obj=message), status.HTTP_200_OK 
+    return json.dumps(obj=message), Staus_code.HTTP_200_OK
 
 
 @bp.route('/view/<int:note_id>', methods=['GET'])
@@ -35,13 +34,13 @@ def view_one(note_id):
     # return json.dumps(obj={'content': note.content, 'created_by': note.created_by,  'is_active': note.is_active}), status.HTTP_200_OK
 
     try:
-        return json.dumps(obj={'content': note.content, 'created_by': note.created_by,  'is_active': note.is_active}), status.HTTP_200_OK
+        return json.dumps(obj={'content': note.content, 'created_by': note.created_by,
+                               'is_active': note.is_active}), Staus_code.HTTP_200_OK
     except:
         return 'Improper id provided'
-        
 
 
-@bp.route('/save', methods= ['PUT'])
+@bp.route('/save', methods=['PUT'])
 def save():
     try:
         created_by = request.json['created_by']
@@ -52,27 +51,28 @@ def save():
     try:
         Notes.add(final_content)
         Notes.commit()
-        return 'Note created succesfully', status.HTTP_201_CREATED
+        return 'Note created succesfully', Staus_code.HTTP_201_CREATED
 
     except:
         return 'problem in adding and commiting DataBase'
 
-@bp.route('/update/<int:note_id>', methods= ['PUT'])
+
+@bp.route('/update/<int:note_id>', methods=['PUT'])
 def update(note_id):
     note = Notes.view_by_id(note_id)
     try:
         note.content = request.json['content']
     except:
-        return 'no proper content provide, check for content attribute'
+        return 'no proper content provide, check for content attribute', Staus_code.HTTP_406_NOT_ACCEPTABLE
     try:
         Notes.commit()
-        return "Note have been updated succesfully", status.HTTP_202_ACCEPTED
+        return "Note have been updated succesfully", Staus_code.HTTP_202_ACCEPTED
 
     except:
-         return 'problem in commiting to DataBase'
+        return 'problem in commiting to DataBase'
 
 
-@bp.route('/delete/<int:note_id>', methods= ['DELETE'])
+@bp.route('/delete/<int:note_id>', methods=['DELETE'])
 def delete(note_id):
     note = Notes.view_by_id(note_id)
     if note is None:
@@ -82,12 +82,7 @@ def delete(note_id):
 
         try:
             Notes.commit()
-            return "Note have been Deleted succesfully", status.HTTP_202_ACCEPTED
+            return "Note have been Deleted succesfully", Staus_code.HTTP_202_ACCEPTED
 
         except:
             return 'problem in commiting to DataBase'
-
-
-
-
-

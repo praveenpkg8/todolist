@@ -1,6 +1,8 @@
 from init import init_app
+from flask_cors import CORS
 
 app = init_app()
+CORS(app)
 
 @app.route("/")
 def welcome():
