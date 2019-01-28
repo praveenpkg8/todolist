@@ -1,7 +1,6 @@
-import flask_sqlalchemy
+from models import db
 from datetime import datetime
 
-db = flask_sqlalchemy.SQLAlchemy()
 
 class Notes(db.Model):
 
@@ -10,13 +9,13 @@ class Notes(db.Model):
     id = db.Column(db.Integer,primary_key = True,  autoincrement = True)
     created_by = db.Column(db.String(50))
     content = db.Column(db.String(200))
-    created_on = db.Column(db.DateTime())
+    created_on = db.Column(db.String(50))
     is_active = db.Column(db.Boolean())
 
     def __init__(self, created_by, content):
         self.created_by = created_by
         self.content = content
-        self.created_on = datetime.utcnow()
+        self.created_on = str(datetime.utcnow())
         self.is_active = True
 
     def __repr__(self):
@@ -24,20 +23,13 @@ class Notes(db.Model):
 
     @staticmethod
     def view_all():
-        try:
-            return Notes.query.all()
-
-        except:
-            return "No Notes found in DB"
+        return Notes.query.all()
 
     @staticmethod
     def view_by_id(note_id):
-        try:
-            return Notes.query.get(note_id)
+        return Notes.query.get(note_id)
 
-        except:
-            return 'improper id provided'
-
+      
     @staticmethod
     def add(object):
         db.session.add(object)

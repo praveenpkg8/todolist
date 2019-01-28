@@ -3,14 +3,14 @@ import json
 
 from flask import Blueprint, request,jsonify
 
-from todo.models import  Notes
+from models.todo import  Notes
 from flask_api import status
 
 
 bp = Blueprint('notes',__name__,url_prefix='/notes')
 
 
-@bp.route('/viewall', methods=['GET'])
+@bp.route('/list', methods=['GET'])
 def view():
     active_notes = Notes.query.all()
     data = list()
@@ -19,20 +19,26 @@ def view():
             'id': note.id,
             'content': note.content,
             'created_by': note.created_by,
-            'created_on': note.created_on,
+            # 'created_on': note.created_on,
             'is_active': note.is_active
         }
         data.append(final_content)
-    return json.dumps(obj={'hello': data}), status.HTTP_200_OK 
+    message = {
+        "notes": data
+    }
+    return json.dumps(obj=message), status.HTTP_200_OK 
 
 
 @bp.route('/view/<int:note_id>', methods=['GET'])
 def view_one(note_id):
     note = Notes.view_by_id(note_id)
+    # return json.dumps(obj={'content': note.content, 'created_by': note.created_by,  'is_active': note.is_active}), status.HTTP_200_OK
+
     try:
-        return json.dumps(obj={'content': note.content, 'created_by': note.created_by, 'created_on': note.created_on, 'is_active': note.is_active}), status.HTTP_200_OK
+        return json.dumps(obj={'content': note.content, 'created_by': note.created_by,  'is_active': note.is_active}), status.HTTP_200_OK
     except:
         return 'Improper id provided'
+        
 
 
 @bp.route('/save', methods= ['PUT'])
