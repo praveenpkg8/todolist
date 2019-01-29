@@ -1,7 +1,6 @@
-import flask_sqlalchemy
 from datetime import datetime
+from models import db
 
-db = flask_sqlalchemy.SQLAlchemy()
 
 class Notes(db.Model):
 

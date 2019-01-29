@@ -4,4 +4,3 @@ migrations/
 todoenv/
 data.sqlite
 config.yaml
-.idea/
