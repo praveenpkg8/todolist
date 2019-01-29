@@ -1,12 +1,31 @@
 from datetime import datetime
 from models import db
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+
+class NoteNotFoundException(Exception):
+
+    def __init__(self, value):
+        self.error_message = value
+
+class RecordNotFoundException(Exception):
+
+    def __init__(self, value):
+        self.error_message = value
+
+
+
+
 
 
 class Notes(db.Model):
 
     __tablename__ = 'notes'
 
-    id = db.Column(db.Integer,primary_key = True,  autoincrement = True)
+    id = db.Column(db.Integer, primary_key = True,  autoincrement = True)
     created_by = db.Column(db.String(50))
     content = db.Column(db.String(200))
     created_on = db.Column(db.DateTime())
@@ -24,22 +43,35 @@ class Notes(db.Model):
     @staticmethod
     def view_all():
         try:
-            return Notes.query.all()
+            notes = Notes.query.all()
+            if notes is not None:
+                return notes
+            else:
+                raise RecordNotFoundException("Records not Found")
 
-        except:
-            return "No Notes found in DB"
+        except Exception as e:
+            logger.error(e)
+            raise RecordNotFoundException("Records not Found")
 
     @staticmethod
     def view_by_id(note_id):
         try:
-            return Notes.query.get(note_id)
+            note = Notes.query.get(note_id)
+            if note is not None:
+                return note
+            else:
+                raise NoteNotFoundException("Note not found, check with id")
 
-        except:
-            return 'improper id provided'
+        except Exception as e:
+            logger.error(e)
+            raise NoteNotFoundException("Note not found, check with id")
+
+
+
 
     @staticmethod
-    def add(object):
-        db.session.add(object)
+    def add(obj):
+        db.session.add(obj)
 
     @staticmethod
     def commit():
