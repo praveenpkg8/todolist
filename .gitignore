@@ -4,5 +4,4 @@ migrations/
 todoenv/
 data.sqlite
 config.yaml
-.idea/
-*.xml
+.idea/workspace.xml
