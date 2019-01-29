@@ -1,7 +1,7 @@
 from models.todo import Notes
 
 
-def fetch_all_notes():
+def fetch_all_notes() -> list:
     notes = list()
     active_notes = Notes.view_all()
     for note in active_notes:
