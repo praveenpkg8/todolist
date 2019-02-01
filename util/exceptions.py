@@ -20,13 +20,3 @@ class NoteDeletedException(Exception):
 
     def __init__(self, value):
         self.error_message = value
-
-class UserNameNotFoundException(Exception):
-
-    def __init__(self, value):
-        self.error_message = value
-
-class ContentNotFoundException(Exception):
-
-    def __init__(self, value):
-        self.error_message = value
