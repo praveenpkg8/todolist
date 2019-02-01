@@ -4,4 +4,5 @@ migrations/
 todoenv/
 data.sqlite
 config.yaml
-.idea/workspace.xml
+.idea/
+init.pyc
