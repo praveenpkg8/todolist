@@ -1,10 +1,15 @@
-import functools
 import json
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
+
 from modules.notes.composed import fetch_all_notes
-from models.todo import Notes
-from flask_api import status
+from models.todo import (Notes, NoteNotFoundException,
+                         logger)
+from modules.notes.composed import construct_response_message
+from modules.notes.parser import NoteParser
+from util.exceptions import (NoteDeletedException, DataBaseSessionException,
+                             UserNameNotFoundException, ContentNotFoundException)
+from status import status
 
 bp = Blueprint('notes', __name__, url_prefix='/todo')
 
@@ -12,63 +17,87 @@ bp = Blueprint('notes', __name__, url_prefix='/todo')
 @bp.route('/notes', methods=['GET'])
 def view():
     data = fetch_all_notes()
-    return json.dumps(obj={'notes': data}), status.HTTP_200_OK
+    message = construct_response_message(notes= data)
+    return json.dumps(message), status.HTTP_200_OK
 
 
 @bp.route('/notes/<int:note_id>', methods=['GET'])
 def view_one(note_id):
-    note = Notes.view_by_id(note_id)
     try:
-        return json.dumps(obj={'content': note.content, 'created_by': note.created_by, 'created_on': note.created_on,
-                               'is_active': note.is_active}), status.HTTP_200_OK
-    except:
-        return 'Improper id provided'
+        note = Notes.view_by_id(note_id)
+        return json.dumps(
+            obj={'content': note.content, 'created_by': note.created_by, 'created_on': str(note.created_on),
+                 'is_active': note.is_active}), status.HTTP_200_OK
+
+    except NoteNotFoundException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_404_NOT_FOUND
 
 
 @bp.route('/notes', methods=['PUT'])
 def save_note():
     try:
-        created_by = request.json['created_by']
-        content = request.json['content']
-    except:
-        return 'No proper inputs are provided'
-    final_content = Notes(created_by, content)
-    try:
-        Notes.add(final_content)
-        Notes.commit()
-        return 'Note created succesfully', status.HTTP_201_CREATED
+        note = request.get_json()
+        final_content = NoteParser.note_parse(note)
+        Notes.create_note(final_content)
+        message = construct_response_message(message='Note created successfully')
+        return json.dumps(message), status.HTTP_201_CREATED
 
-    except:
-        return 'problem in adding and commiting DataBase'
+    except DataBaseSessionException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    except UserNameNotFoundException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    except ContentNotFoundException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
 @bp.route('/notes/<int:note_id>', methods=['PUT'])
 def update_note(note_id):
-    note = Notes.view_by_id(note_id)
     try:
-        note.content = request.json['content']
+        Notes.update_note(note_id)
+        message = construct_response_message(message='Note updated successfully')
+        return json.dumps(message), status.HTTP_200_OK
 
-    except:
-        return 'no proper content provide, check for content attribute'
-    try:
-        Notes.commit()
-        return "Note have been updated succesfully", status.HTTP_202_ACCEPTED
+    except NoteNotFoundException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_404_NOT_FOUND
 
-    except:
-        return 'problem in commiting to DataBase'
+    except DataBaseSessionException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
 @bp.route('/notes/<int:note_id>', methods=['DELETE'])
 def delete_note(note_id):
-    note = Notes.view_by_id(note_id)
-    if note is None:
-        return 'invalid id'
-    else:
-        note.is_active = False
+    try:
+        Notes.delete_note_check(note_id)
+        message = construct_response_message(response_message="Note Deleted succesfully")
+        return json.dumps(message), status.HTTP_200_OK
 
-        try:
-            Notes.commit()
-            return "Note have been Deleted succesfully", status.HTTP_202_ACCEPTED
+    except NoteDeletedException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_406_NOT_ACCEPTABLE
 
-        except:
-            return 'problem in commiting to DataBase'
+    except NoteNotFoundException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_404_NOT_FOUND
+
+    except DataBaseSessionException as e:
+        logger.error(msg=e.error_message)
+        message = construct_response_message(error_message=e.error_message)
+        return json.dumps(message), status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
