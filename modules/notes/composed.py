@@ -1,6 +1,8 @@
 from typing import Dict, Any
 
 from models.todo import Notes
+from flask import request
+
 
 
 def fetch_all_notes() -> list:
@@ -17,5 +19,6 @@ def fetch_all_notes() -> list:
             notes.append(final_content)
 
     return notes
+
 
 construct_response_message = lambda **kwargs: kwargs
