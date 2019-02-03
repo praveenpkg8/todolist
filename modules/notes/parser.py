@@ -1,22 +1,22 @@
-from typing import List, Dict
-from models.todo import Notes
+from typing import List
+
 from flask import request
 
+from models import Notes
+from util.exceptions import NoteNotFoundException
+from util.helper import Listnote
 
-class NoteParser:
+
+class TodoParser:
     @staticmethod
-    def note_parse():
+    def parse_save_note(note_id):
         try:
-            request_note = request.get_json()
-            created_by = request_note['created_by']
-            content = request_note['content']
-            final_note = Notes(created_by, content)
-            Notes.create_note(final_note)
+            created_by = request.json['created_by']
+            content = request.json['content']
+        except KeyError:
+            raise
 
-        except KeyError as err:
-            raise err
-
-
+        pass
 
 
 
