@@ -1,9 +1,7 @@
 import datetime
 from models import db
 import logging
-from flask import request
-from util.exceptions import (RecordNotFoundException, NoteNotFoundException,
-                             NoteDeletedException, DataBaseSessionException)
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,55 +25,21 @@ class Notes(db.Model):
         return "<Notes {}".format(self.content)
 
     @staticmethod
-    def view_all_note():
+    def get_all_notes():
         notes = Notes.query.all()
-        if notes is not None:
-            return notes
-        else:
-            raise RecordNotFoundException("Records not Found")
+        return notes
 
     @staticmethod
-    def view_by_id(note_id: int):
-        note = Notes.query.get(note_id)
-        if note is not None:
-            return note
-        else:
-            raise NoteNotFoundException("Note not found, check with id")
-
-    @staticmethod
-    def update_note(note_id: int):
-        try:
-            note = Notes.query.get(note_id)
-            if note is not None:
-                request_note = request.get_json()
-                note.content = request_note['content']
-                db.session.commit()
-            else:
-                raise NoteNotFoundException("Note not found, check with id")
-        except DataBaseSessionException:
-            raise DataBaseSessionException("Database Session Error")
-
-    @staticmethod
-    def delete_note_check(note_id: int):
-        try:
-            note = Notes.query.get(note_id)
-            if note is None:
-                raise NoteNotFoundException("Note not found, check with id")
-            elif note.is_active is not False:
-                note.is_active = False
-                db.session.commit()
-            else:
-                raise NoteDeletedException("Note is been Deleted already")
-
-        except DataBaseSessionException:
-            raise DataBaseSessionException("Database Session Error")
+    def get_note(id):
+        note = Notes.query.get(id)
+        return note
 
     @staticmethod
     def create_note(note: object):
-        try:
-            db.session.add(note)
-            db.session.commit()
+        db.session.add(note)
+        db.session.commit()
 
-        except DataBaseSessionException:
-            raise DataBaseSessionException("Database Session Error")
+    @staticmethod
+    def update_note():
+        db.session.commit()
 
