@@ -1,4 +1,4 @@
-class status:
+class Status:
     HTTP_100_CONTINUE = 100
     HTTP_101_SWITCHING_PROTOCOLS = 101
 
