@@ -9,10 +9,10 @@ from util.helper import (Dictnote, Listnote)
 def fetch_all_notes() -> List:
     all_todo = Notes.get_all_notes()
     if all_todo is not None:
-        data = list()
+        data = []
         for note in all_todo:
             final_note = Dictnote(
-                name=note.created_by,
+                created_by=note.created_by,
                 content=note.content,
                 created_at=str(note.created_on),
                 is_active=note.is_active
@@ -27,9 +27,9 @@ def fetch_note(note_id) -> List:
     note = Notes.get_note(note_id)
     if note is not None:
         final_note = Listnote(
-            name=note.created_by,
+            created_by=note.created_by,
             content=note.content,
-            created_at=str(note.created_on)
+            created_on=str(note.created_on)
         )
         return final_note
     else:

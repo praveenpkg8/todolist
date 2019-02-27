@@ -20,3 +20,21 @@ class NoteDeletedException(Exception):
 
     def __init__(self, value):
         self.error_message = value
+
+
+class EmailFormatException(Exception):
+
+    def __init__(self, value):
+        self.error_message = value
+
+
+class MobileNumberFormatException(Exception):
+
+    def __init__(self, value):
+        self.error_message = value
+
+
+class MobileNumberLengthException(Exception):
+
+    def __init__(self, value):
+        self.error_message = value

@@ -14,15 +14,14 @@ bp = Blueprint('notes', __name__, url_prefix='/todo')
 def view_all_todo():
     notes = fetch_all_notes()
     message = construct_response_message(notes=notes)
-    return json.dumps(obj=message), Status.HTTP_200_OK
+    return json.dumps(message), Status.HTTP_200_OK
 
 
 @bp.route('/note/<int:note_id>', methods=['GET'])
 def view_note(note_id):
     try:
         note = fetch_note(note_id)
-        message = construct_response_message(notes=note)
-        return json.dumps(obj=message), Status.HTTP_200_OK
+        return json.dumps(obj=note), Status.HTTP_200_OK
     except NoteNotFoundException as e:
         message = construct_response_message(error_message=e.error_message)
         return json.dumps(message), Status.HTTP_404_NOT_FOUND
@@ -44,7 +43,7 @@ def update_note(note_id):
     try:
         update_todo_note(note_id)
         message = construct_response_message(response_message="Note Updated Successfully")
-        return json.dumps(message), Status.HTTP_404_NOT_FOUND
+        return json.dumps(message), Status.HTTP_200_OK
     except KeyError as err:
         message = construct_response_message(error_message='key error : ' + str(err))
         return json.dumps(message), Status.HTTP_404_NOT_FOUND
@@ -55,7 +54,7 @@ def delete_note(note_id):
     try:
         delete_todo_note(note_id)
         message = construct_response_message(response_message="Note Deleted Successfully")
-        return json.dumps(message), Status.HTTP_404_NOT_FOUND
+        return json.dumps(message), Status.HTTP_200_OK
     except KeyError as err:
         message = construct_response_message(error_message='key error : ' + str(err))
         return json.dumps(message), Status.HTTP_404_NOT_FOUND
